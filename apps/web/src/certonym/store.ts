@@ -30,13 +30,6 @@ export function getCertonymStore(): CertonymStore {
             | undefined;
         store = new CertonymStore({
             cisBaseUrl: cfg?.cisBaseUrl ?? "https://cdot.chat",
-            // M2 interim posture (ADR-0006): CIS does not sign attestations yet,
-            // so accept the `keyId: "unsigned"` sentinel. Safe only while
-            // federation is closed and we talk to CIS directly over TLS.
-            // M3 REMOVES this flag from the SDK entirely — when CIS starts
-            // signing (Ed25519 key at /.well-known/cdot/identity), delete this
-            // line and let the default fail-closed policy verify signatures.
-            allowUnsigned: true,
         });
     }
     return store;
