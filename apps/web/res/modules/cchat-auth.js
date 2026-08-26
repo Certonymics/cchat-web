@@ -3264,10 +3264,12 @@ var eo = {
 	"face-unavailable",
 	"video-failed"
 ]);
-function X(e) {
+function X(e, t) {
+	let n = eo[e], r = t instanceof Error && t.message && t.message !== e ? t.message : typeof t == "string" ? t : void 0;
 	return {
 		code: e,
-		...eo[e],
+		...n,
+		...r ? { detail: r } : {},
 		canResumePolling: e === "poll-timeout",
 		canRetryFace: ro.has(e)
 	};
@@ -3460,7 +3462,7 @@ var so = class {
 			if (this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e))
+				error: X(io(e), e)
 			});
 			return;
 		}
@@ -3480,7 +3482,7 @@ var so = class {
 			if (r.stop(), this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e))
+				error: X(io(e), e)
 			});
 			return;
 		}
@@ -3502,7 +3504,7 @@ var so = class {
 			if (this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e))
+				error: X(io(e), e)
 			});
 			return;
 		}
@@ -3522,7 +3524,7 @@ var so = class {
 			if (r.stop(), this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e))
+				error: X(io(e), e)
 			});
 			return;
 		}
@@ -3780,11 +3782,10 @@ var mo = (e) => new Promise((t) => setTimeout(t, e)), ho = class {
 		let r = !1;
 		return {
 			captureEmbedding: async () => {
-				let e = window.FaceEngine?.ANTISPOOF_THRESHOLD ?? .9;
-				for (let i = 0; i < 50 && !r; i++) {
+				for (let e = 0; e < 50 && !r; e++) {
 					if (n.videoWidth > 0) {
-						let r = await t.detectAndEmbed(po(n, 320));
-						if (r && (r.realProb < 0 || r.realProb >= e)) return Array.from(r.embedding);
+						let e = await t.detectAndEmbed(po(n, 320));
+						if (e) return Array.from(e.embedding);
 					}
 					await mo(400);
 				}
@@ -4100,6 +4101,18 @@ function Co(e) {
 					style: $.errorBody,
 					children: t.error.body
 				}),
+				t.error.detail ? /* @__PURE__ */ (0, Q.jsxs)("p", {
+					style: {
+						...$.errorBody,
+						fontSize: "0.75rem",
+						opacity: .6
+					},
+					children: [
+						t.error.code,
+						": ",
+						t.error.detail
+					]
+				}) : null,
 				/* @__PURE__ */ (0, Q.jsx)("button", {
 					style: $.button,
 					onClick: () => t.error.canResumePolling ? void s.current?.resumePolling() : t.error.canRetryFace ? void s.current?.retryFaceCheck() : s.current?.reset(),
