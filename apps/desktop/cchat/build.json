@@ -1,0 +1,11 @@
+{
+    "appId": "chat.cdot.desktop",
+    "name": "cchat-desktop",
+    "productName": "c.chat",
+    "description": "c.chat: certonym-verified secure messaging on Matrix",
+    "protocols": ["chat.cdot.desktop", "cchat"],
+    "icons": "cchat/icons",
+    "copyright": "Copyright © 2026 Certonymics. Contains code © New Vector Ltd / Element Creations Ltd (AGPL-3.0).",
+    "linux.executableName": "cchat-desktop",
+    "linux.deb.name": "cchat-desktop"
+}

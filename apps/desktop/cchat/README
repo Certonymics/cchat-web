@@ -1,0 +1,20 @@
+This directory contains the build variant + runtime config for the c.chat
+distribution of the desktop app (see ADR-0002: full rebrand, no Element
+trademark usage).
+
+- build.json  : electron-builder variant (appId chat.cdot.desktop, productName
+                "c.chat", cchat icons). Consumed by ../electron-builder.ts via
+                VARIANT_PATH=cchat/build.json.
+- config.json : the config.json packed into webapp.asar for desktop builds.
+                Mirrors apps/web/config.json plus desktop-only keys
+                (help_url, web_base_url). It deliberately contains NO
+                "update_base_url": the desktop app's updater is therefore
+                disabled (electron-main logs "No update_base_url is defined:
+                auto update is disabled"). Do NOT copy Element's
+                update_base_url here — pulling updates from a feed we do not
+                control is a security problem. Set update_base_url only once
+                a c.chat-operated update server exists.
+- icons/      : placeholder "c." icons (icon.icns / icon.ico / icon.png),
+                generated in-house; no Element artwork.
+
+See ../CCHAT-BUILD.md for the full build procedure.

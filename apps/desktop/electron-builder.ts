@@ -57,6 +57,14 @@ interface Variant extends Metadata {
     "linux.executableName"?: string;
     "linux.deb.name"?: string;
     "protocols": string[];
+    /**
+     * Optional directory (relative to apps/desktop) containing brand icons:
+     * icon.icns (mac), icon.ico (win), icon.png (linux + runtime tray/window).
+     * When set, these are used instead of the default Element icons in build/.
+     */
+    "icons"?: string;
+    /** Optional copyright string override (defaults to electron-builder's "Copyright © year ${author}"). */
+    "copyright"?: string;
 }
 
 type Writable<T> = NonNullable<
@@ -204,6 +212,32 @@ const config: Omit<Writable<Configuration>, "electronFuses"> & {
  */
 if (process.env.VERSION) {
     config.extraMetadata.version = process.env.VERSION;
+}
+
+/**
+ * If the variant ships its own icons, point every icon reference at them and
+ * make sure only those icons (not the default Element ones in build/) are
+ * copied into the app resources (resources/build/icon.* is looked up at
+ * runtime by src/icon.ts for the window/tray icon).
+ */
+if (variant.icons) {
+    config.mac.icon = path.join(variant.icons, "icon.icns");
+    config.dmg!.badgeIcon = path.join(variant.icons, "icon.icns");
+    config.win.icon = path.join(variant.icons, "icon.ico");
+    config.linux.icon = path.join(variant.icons, "icon.png");
+    config.extraResources = [{ from: variant.icons, to: "build", filter: "icon.*" }, "webapp.asar"];
+
+    // Branded (non-Element) builds do not publish via electron-builder and must not
+    // ship an app-update.yml derived from package.json's upstream repository field
+    // (it would reference vector-im/element-web). The in-app updater is solely
+    // controlled by `update_base_url` in the packed config.json.
+    // `null` is the documented electron-builder value for "no publishing", but the
+    // Writable<> helper above strips null from the type, hence the cast.
+    (config as { publish: unknown }).publish = null;
+}
+
+if (variant.copyright) {
+    config.copyright = variant.copyright;
 }
 
 if (variant["linux.deb.name"]) {
