@@ -716,6 +716,12 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
                     { from: "decoder-ring/**", context: path.resolve(__dirname, "res") },
                     { from: "media/**", context: path.resolve(__dirname, "res/") },
                     { from: "modules/**", context: path.resolve(__dirname, "res"), noErrorOnMissing: true }, // c.chat runtime modules
+                    // c.chat in-app face-check assets (engine bundle + ONNX
+                    // models + ORT wasm), served at /certonym/face/ and loaded
+                    // lazily by the auth module only when CIS asks for a face
+                    // check. Kept out of webpack's module graph on purpose —
+                    // the ~34MB of models must never enter any JS bundle.
+                    { from: "certonym/**", context: path.resolve(__dirname, "res"), noErrorOnMissing: true },
                     { from: "config.json", noErrorOnMissing: true },
                     // Element Call embedded widget
                     {
