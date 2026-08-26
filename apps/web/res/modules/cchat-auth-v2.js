@@ -3098,7 +3098,7 @@ function Ua(e, t) {
 //#region src/config.ts
 var Wa = G({
 	cisBaseUrl: B().url(),
-	faceAssetsUrl: B().default("/certonym/face/")
+	faceAssetsUrl: B().default("/certonym/face-v2/")
 }), Ga = "com.certonymics.cchat", Ka = K([
 	"nfc",
 	"web",
