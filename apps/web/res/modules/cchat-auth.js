@@ -3130,7 +3130,8 @@ var Ya = K(["embedding", "video"]), Xa = ga("kind", [
 G({ sessionId: B() });
 var Za = G({
 	mxid: B(),
-	loginToken: B(),
+	accessToken: B(),
+	deviceId: B(),
 	proofMode: qa
 });
 ma([G({
@@ -3666,50 +3667,17 @@ var so = class {
 	}
 	async finishLogin(e) {
 		this.setState({ phase: "logging-in" });
-		let t;
-		try {
-			t = await this.deps.fetchFn(`${this.deps.homeserverUrl}/_matrix/client/v3/login`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					type: "m.login.token",
-					token: e.loginToken,
-					initial_device_display_name: "c.chat (web)"
-				})
-			});
-		} catch {
-			this.setState({
-				phase: "error",
-				error: X("cos-unreachable")
-			});
-			return;
-		}
-		if (!t.ok) {
-			this.setState({
-				phase: "error",
-				error: X("session-expired")
-			});
-			return;
-		}
-		let n = await t.json().catch(() => null) ?? {};
-		if (typeof n.user_id != "string" || typeof n.device_id != "string" || typeof n.access_token != "string") {
-			this.setState({
-				phase: "error",
-				error: X("session-expired")
-			});
-			return;
-		}
 		try {
 			await this.deps.onAuthenticated({
-				userId: n.user_id,
-				deviceId: n.device_id,
-				accessToken: n.access_token,
+				userId: e.mxid,
+				deviceId: e.deviceId,
+				accessToken: e.accessToken,
 				homeserverUrl: this.deps.homeserverUrl
 			});
-		} catch {
+		} catch (e) {
 			this.setState({
 				phase: "error",
-				error: X("cos-unreachable")
+				error: X("cos-unreachable", e)
 			});
 			return;
 		}
