@@ -3253,12 +3253,12 @@ var eo = {
 	faceCheckingStatus: "Checking it's you…",
 	facePrivacyNote: "Camera images never leave this device — only a one-way face signature is sent.",
 	faceVideoPrivacyNote: "A short video is sent securely for verification only, then discarded — it is never stored."
-}, to = "cchat.pending", no = 3e3, Y = class extends Error {
+}, to = "cchat.pending", no = 3e3, ro = 2e4, Y = class extends Error {
 	reason;
 	constructor(e, t) {
 		super(t ?? e), this.reason = e, this.name = "FaceCaptureError";
 	}
-}, ro = /* @__PURE__ */ new Set([
+}, io = /* @__PURE__ */ new Set([
 	"camera-denied",
 	"face-timeout",
 	"face-retry",
@@ -3272,10 +3272,10 @@ function X(e, t) {
 		...n,
 		...r ? { detail: r } : {},
 		canResumePolling: e === "poll-timeout",
-		canRetryFace: ro.has(e)
+		canRetryFace: io.has(e)
 	};
 }
-function io(e) {
+function ao(e) {
 	switch (e instanceof Y ? e.reason : "engine-failed") {
 		case "camera-denied": return "camera-denied";
 		case "no-face": return "face-timeout";
@@ -3283,7 +3283,7 @@ function io(e) {
 		default: return "face-unavailable";
 	}
 }
-function ao(e, t, n) {
+function oo(e, t, n) {
 	let r = (n ?? "").toLowerCase();
 	switch (t) {
 		case "CIS_NO_ACCOUNT": return {
@@ -3310,7 +3310,7 @@ function ao(e, t, n) {
 		};
 	}
 }
-function oo(e, t, n) {
+function so(e, t, n) {
 	if (n || t === "CIS_DID_NO_EMBEDDING") return { outcome: "fallback-kyc" };
 	switch (t) {
 		case "CIS_FACE_NO_MATCH": return { outcome: "no-match" };
@@ -3322,7 +3322,7 @@ function oo(e, t, n) {
 		};
 	}
 }
-var so = class {
+var co = class {
 	deps;
 	stateInternal = { phase: "idle" };
 	disposed = !1;
@@ -3463,7 +3463,7 @@ var so = class {
 			if (this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e), e)
+				error: X(ao(e), e)
 			});
 			return;
 		}
@@ -3483,7 +3483,7 @@ var so = class {
 			if (r.stop(), this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e), e)
+				error: X(ao(e), e)
 			});
 			return;
 		}
@@ -3505,7 +3505,7 @@ var so = class {
 			if (this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e), e)
+				error: X(ao(e), e)
 			});
 			return;
 		}
@@ -3525,7 +3525,7 @@ var so = class {
 			if (r.stop(), this.disposed || t !== this.pollRun) return;
 			this.setState({
 				phase: "error",
-				error: X(io(e), e)
+				error: X(ao(e), e)
 			});
 			return;
 		}
@@ -3569,7 +3569,7 @@ var so = class {
 			this.faceCtx = null, await this.finishLogin(e.data);
 			return;
 		}
-		let a = i ?? {}, o = oo(r.status, a.errcode, a.retryWithKyc === !0);
+		let a = i ?? {}, o = so(r.status, a.errcode, a.retryWithKyc === !0);
 		switch (o.outcome) {
 			case "no-match":
 				e.failedMatches++, e.failedMatches >= 3 ? (this.faceCtx = null, this.setState({
@@ -3663,17 +3663,19 @@ var so = class {
 			} : { outcome: "retry" };
 		}
 		let i = r ?? {};
-		return ao(n.status, i.errcode, i.error);
+		return oo(n.status, i.errcode, i.error);
 	}
 	async finishLogin(e) {
 		this.setState({ phase: "logging-in" });
 		try {
-			await this.deps.onAuthenticated({
+			await Promise.race([this.deps.onAuthenticated({
 				userId: e.mxid,
 				deviceId: e.deviceId,
 				accessToken: e.accessToken,
 				homeserverUrl: this.deps.homeserverUrl
-			});
+			}), this.deps.sleep(ro).then(() => {
+				throw Error("the app did not complete sign-in in time");
+			})]);
 		} catch (e) {
 			this.setState({
 				phase: "error",
@@ -3684,29 +3686,29 @@ var so = class {
 		this.setState({
 			phase: "done",
 			mxid: e.mxid
-		});
+		}), this.deps.reload?.();
 	}
 };
-function co(e) {
+function lo(e) {
 	return e.endsWith("/") ? e : `${e}/`;
 }
-function lo(e) {
+function uo(e) {
 	return new Promise((t, n) => {
 		let r = document.createElement("script");
 		r.src = e, r.onload = () => t(), r.onerror = () => n(/* @__PURE__ */ Error(`failed to load ${e}`)), document.head.appendChild(r);
 	});
 }
-var uo = null;
-function fo(e) {
-	return uo ??= (async () => {
-		if (window.FaceEngine || await lo(`${e}face-engine.js`), !window.FaceEngine) throw Error("face-engine.js did not define window.FaceEngine");
+var fo = null;
+function po(e) {
+	return fo ??= (async () => {
+		if (window.FaceEngine || await uo(`${e}face-engine.js`), !window.FaceEngine) throw Error("face-engine.js did not define window.FaceEngine");
 		return window.FaceEngine.loadFaceEngine({ baseUrl: e });
 	})().catch((e) => {
-		throw uo = null, e;
-	}), uo;
+		throw fo = null, e;
+	}), fo;
 }
 var Z = null;
-function po(e, t) {
+function mo(e, t) {
 	let n = Math.max(1, Math.round(e.videoHeight / e.videoWidth * t));
 	if (!Z) {
 		let e = document.createElement("canvas"), t = e.getContext("2d", { willReadFrequently: !0 });
@@ -3718,11 +3720,11 @@ function po(e, t) {
 	}
 	return Z.canvas.width !== t && (Z.canvas.width = t), Z.canvas.height !== n && (Z.canvas.height = n), Z.ctx.drawImage(e, 0, 0, t, n), Z.ctx.getImageData(0, 0, t, n);
 }
-var mo = (e) => new Promise((t) => setTimeout(t, e)), ho = class {
+var ho = (e) => new Promise((t) => setTimeout(t, e)), go = class {
 	onPreview;
 	baseUrl;
 	constructor(e, t) {
-		this.onPreview = t, this.baseUrl = co(e);
+		this.onPreview = t, this.baseUrl = lo(e);
 	}
 	async start() {
 		let e;
@@ -3738,24 +3740,24 @@ var mo = (e) => new Promise((t) => setTimeout(t, e)), ho = class {
 		} catch (e) {
 			throw new Y("camera-denied", e instanceof Error ? e.message : void 0);
 		}
-		let t;
+		let t = document.createElement("video");
+		t.autoplay = !0, t.muted = !0, t.playsInline = !0, t.srcObject = e, t.play().catch(() => {}), this.onPreview?.(t);
+		let n;
 		try {
-			t = await fo(this.baseUrl);
-		} catch (t) {
+			n = await po(this.baseUrl);
+		} catch (n) {
 			for (let t of e.getTracks()) t.stop();
-			throw new Y("engine-failed", t instanceof Error ? t.message : void 0);
+			throw t.srcObject = null, this.onPreview?.(null), new Y("engine-failed", n instanceof Error ? n.message : void 0);
 		}
-		let n = document.createElement("video");
-		n.autoplay = !0, n.muted = !0, n.playsInline = !0, n.srcObject = e, n.play().catch(() => {}), this.onPreview?.(n);
 		let r = !1;
 		return {
 			captureEmbedding: async () => {
 				for (let e = 0; e < 50 && !r; e++) {
-					if (n.videoWidth > 0) {
-						let e = await t.detectAndEmbed(po(n, 320));
+					if (t.videoWidth > 0) {
+						let e = await n.detectAndEmbed(mo(t, 320));
 						if (e) return Array.from(e.embedding);
 					}
-					await mo(400);
+					await ho(400);
 				}
 				throw new Y("no-face");
 			},
@@ -3763,20 +3765,20 @@ var mo = (e) => new Promise((t) => setTimeout(t, e)), ho = class {
 				if (!r) {
 					r = !0;
 					for (let t of e.getTracks()) t.stop();
-					n.srcObject = null, this.onPreview?.(null);
+					t.srcObject = null, this.onPreview?.(null);
 				}
 			}
 		};
 	}
-}, go = [
+}, _o = [
 	"video/mp4",
 	"video/webm;codecs=vp8",
 	"video/webm"
-], _o = 25e5, vo = 4e3;
-function yo() {
-	return typeof MediaRecorder > "u" ? null : go.find((e) => MediaRecorder.isTypeSupported(e)) ?? null;
+], vo = 25e5, yo = 4e3;
+function bo() {
+	return typeof MediaRecorder > "u" ? null : _o.find((e) => MediaRecorder.isTypeSupported(e)) ?? null;
 }
-function bo(e) {
+function xo(e) {
 	return new Promise((t, n) => {
 		let r = new FileReader();
 		r.onload = () => {
@@ -3789,13 +3791,13 @@ function bo(e) {
 		}, r.onerror = () => n(new Y("record-failed", "failed to encode recorded video")), r.readAsDataURL(e);
 	});
 }
-var xo = class {
+var So = class {
 	onPreview;
 	constructor(e) {
 		this.onPreview = e;
 	}
 	async start() {
-		let e = yo();
+		let e = bo();
 		if (!e) throw new Y("record-failed", "video recording is not supported in this browser");
 		let t;
 		try {
@@ -3819,20 +3821,20 @@ var xo = class {
 				try {
 					let r = new MediaRecorder(t, {
 						mimeType: e,
-						videoBitsPerSecond: _o
+						videoBitsPerSecond: vo
 					}), i = [];
 					n = await new Promise((t, n) => {
 						r.ondataavailable = (e) => {
 							e.data && e.data.size > 0 && i.push(e.data);
 						}, r.onerror = (e) => n(e.error ?? /* @__PURE__ */ Error("video recording failed")), r.onstop = () => t(new Blob(i, { type: e })), r.start(), setTimeout(() => {
 							r.state !== "inactive" && r.stop();
-						}, vo);
+						}, yo);
 					});
 				} catch (e) {
 					throw e instanceof Y ? e : new Y("record-failed", e instanceof Error ? e.message : void 0);
 				}
 				if (!n.size) throw new Y("record-failed", "empty recording");
-				return bo(n);
+				return xo(n);
 			},
 			stop: () => {
 				if (!r) {
@@ -3843,7 +3845,7 @@ var xo = class {
 			}
 		};
 	}
-}, So = /* @__PURE__ */ e(((e) => {
+}, Co = /* @__PURE__ */ e(((e) => {
 	var t = Symbol.for("react.transitional.element");
 	function n(e, n, r) {
 		var i = null;
@@ -3859,7 +3861,7 @@ var xo = class {
 	}
 	e.jsx = n, e.jsxs = n;
 })), Q = (/* @__PURE__ */ e(((e, t) => {
-	t.exports = So();
+	t.exports = Co();
 })))(), $ = {
 	root: {
 		display: "flex",
@@ -3947,10 +3949,10 @@ var xo = class {
 		margin: 0
 	}
 };
-function Co(e) {
+function wo(e) {
 	let [t, n] = window.React.useState({ phase: "idle" }), [r, i] = window.React.useState(""), [a, o] = window.React.useState(null), s = window.React.useRef(null), c = window.React.useRef(null);
 	window.React.useEffect(() => {
-		let t = new ho(e.faceAssetsUrl, o), r = new xo(o), i = new so({
+		let t = new go(e.faceAssetsUrl, o), r = new So(o), i = new co({
 			cisBaseUrl: e.cisBaseUrl.replace(/\/+$/, ""),
 			homeserverUrl: e.homeserverUrl.replace(/\/+$/, ""),
 			fetchFn: (...e) => fetch(...e),
@@ -3959,6 +3961,7 @@ function Co(e) {
 			sleep: (e) => new Promise((t) => setTimeout(t, e)),
 			onStateChange: n,
 			onAuthenticated: e.onAuthenticated,
+			reload: () => window.location.reload(),
 			faceCapture: t,
 			faceVideo: r
 		});
@@ -4112,7 +4115,7 @@ function Co(e) {
 }
 //#endregion
 //#region package.json
-var wo = "@cchat/element-module", To = class {
+var To = "@cchat/element-module", Eo = class {
 	api;
 	static moduleApiVersion = "^1.15.0";
 	constructor(e) {
@@ -4121,16 +4124,16 @@ var wo = "@cchat/element-module", To = class {
 	async load() {
 		let e = this.api.config.get(Ga);
 		if (!e) {
-			console.debug(`No configuration found for module "${wo}", skipping initialization.`);
+			console.debug(`No configuration found for module "${To}", skipping initialization.`);
 			return;
 		}
 		let t;
 		try {
 			t = Wa.parse(e);
 		} catch (e) {
-			throw console.error("Failed to init module", e), Error(`Errors in module configuration for "${wo}"`);
+			throw console.error("Failed to init module", e), Error(`Errors in module configuration for "${To}"`);
 		}
-		this.api.customComponents.registerLoginComponent((e) => /* @__PURE__ */ (0, Q.jsx)(Co, {
+		this.api.customComponents.registerLoginComponent((e) => /* @__PURE__ */ (0, Q.jsx)(wo, {
 			cisBaseUrl: t.cisBaseUrl,
 			faceAssetsUrl: t.faceAssetsUrl,
 			homeserverUrl: e.serverConfig.hsUrl,
@@ -4140,6 +4143,6 @@ var wo = "@cchat/element-module", To = class {
 	}
 };
 //#endregion
-export { To as default };
+export { Eo as default };
 
 //# sourceMappingURL=index.js.map
