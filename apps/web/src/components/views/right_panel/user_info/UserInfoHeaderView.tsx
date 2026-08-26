@@ -17,6 +17,7 @@ import PresenceLabel from "../../rooms/PresenceLabel";
 import CopyableText from "../../elements/CopyableText";
 import { UserInfoHeaderVerificationView } from "./UserInfoHeaderVerificationView";
 import { useUserStatus } from "../../../../hooks/useUserStatus";
+import { CertonymBadge } from "../../../../certonym/CertonymBadge";
 
 export interface UserInfoHeaderViewProps {
     member: Member;
@@ -72,6 +73,9 @@ export const UserInfoHeaderView: React.FC<UserInfoHeaderViewProps> = ({
                 <Flex direction="column" align="center" className="mx_UserInfo_profile">
                     <Heading size="sm" weight="semibold" as="h1" dir="auto">
                         <Flex className="mx_UserInfo_profile_name" direction="row-reverse" align="center">
+                            {/* row-reverse: first child renders last — identity (blue) badge after the name,
+                                complementing the green E2EE section below (UserInfoHeaderVerificationView) */}
+                            <CertonymBadge userId={member.userId} />
                             {displayName}
                         </Flex>
                     </Heading>

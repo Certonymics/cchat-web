@@ -38,6 +38,7 @@
     },
     "dependencies": {
         "@babel/runtime": "^7.12.5",
+        "@cchat/certonym-web-sdk": "link:../../../c.chat/packages/certonym-web-sdk",
         "@element-hq/element-web-module-api": "workspace:*",
         "@element-hq/web-shared-components": "workspace:*",
         "@fontsource/fira-code": "^5",

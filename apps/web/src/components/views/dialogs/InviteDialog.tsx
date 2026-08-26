@@ -62,6 +62,7 @@ import { DMRoomTile } from "./invite/DMRoomTile.tsx";
 import { logErrorAndShowErrorDialog } from "../../../utils/ErrorUtils.tsx";
 import UnknownIdentityUsersWarningDialog from "./invite/UnknownIdentityUsersWarningDialog.tsx";
 import { AddressType, getAddressType } from "../../../UserAddress.ts";
+import { certonymInviteSuggestion } from "../../../certonym/inviteSuggestion";
 
 interface Result {
     userId: string;
@@ -532,6 +533,11 @@ export default class InviteDialog extends React.PureComponent<Props, IInviteDial
 
     private updateSuggestions = debounce(
         async (term: string): Promise<void> => {
+            // c.chat (ADR-0004): email terms also resolve against the certonym directory.
+            void certonymInviteSuggestion(term).then((r) => {
+                if (this.unmounted || term !== this.state.filterText) return;
+                this.setState({ threepidResultsMixin: r.suggestions, errorText: r.noMatch });
+            });
             MatrixClientPeg.safeGet()
                 .searchUserDirectory({ term })
                 .then(async (r): Promise<void> => {

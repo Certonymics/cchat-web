@@ -19,6 +19,7 @@ import { InvitedIconView } from "./common/InvitedIconView";
 import { type MemberWithSeparator } from "../../../../viewmodels/memberlist/MemberListViewModel";
 import { DisambiguatedProfileViewModel } from "../../../../../viewmodels/room/timeline/event-tile/DisambiguatedProfileViewModel";
 import { useUserStatus } from "../../../../../hooks/useUserStatus";
+import { CertonymBadge } from "../../../../../certonym/CertonymBadge";
 
 interface IProps {
     /**
@@ -64,7 +65,12 @@ export function RoomMemberTileView(props: IProps): JSX.Element {
     useEffect(() => {
         disambiguatedProfileVM.setUserStatus(userStatus);
     }, [disambiguatedProfileVM, userStatus]);
-    const nameJSX = <DisambiguatedProfileView vm={disambiguatedProfileVM} className="mx_DisambiguatedProfile" />;
+    const nameJSX = (
+        <>
+            <DisambiguatedProfileView vm={disambiguatedProfileVM} className="mx_DisambiguatedProfile" />
+            <CertonymBadge userId={member.userId} compact />
+        </>
+    );
 
     const presenceState = member.presenceState;
     let presenceJSX: JSX.Element | undefined;

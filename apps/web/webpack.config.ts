@@ -715,6 +715,7 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
                     { from: "vector-icons/**", context: path.resolve(__dirname, "res") },
                     { from: "decoder-ring/**", context: path.resolve(__dirname, "res") },
                     { from: "media/**", context: path.resolve(__dirname, "res/") },
+                    { from: "modules/**", context: path.resolve(__dirname, "res"), noErrorOnMissing: true }, // c.chat runtime modules
                     { from: "config.json", noErrorOnMissing: true },
                     // Element Call embedded widget
                     {

@@ -15,6 +15,7 @@ import {
     type MemberInfo,
 } from "../../../viewmodels/room/timeline/event-tile/DisambiguatedProfileViewModel";
 import { useUserStatus } from "../../../hooks/useUserStatus";
+import { CertonymBadge } from "../../../certonym/CertonymBadge";
 
 interface IProps {
     /** Stable sender ID for the profile. */
@@ -63,6 +64,9 @@ export default function SenderProfile(props: IProps): JSX.Element {
     return isEmote ? (
         <></>
     ) : (
-        <DisambiguatedProfileView vm={disambiguatedProfileVM} className="mx_DisambiguatedProfile" />
+        <>
+            <DisambiguatedProfileView vm={disambiguatedProfileVM} className="mx_DisambiguatedProfile" />
+            {senderId && <CertonymBadge userId={senderId} />}
+        </>
     );
 }
